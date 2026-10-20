@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figuras geométricas</title>
+<style>
+  :root {
+    --fondo: #f6f7f9; --panel: #ffffff; --texto: #1d2330; --suave: #5b6475; --borde: #d9dde5;
+    --acento: #2457d6; --acento-texto: #ffffff; --ok-fondo: #e4f5ea; --ok-texto: #14532d;
+    --error-fondo: #fde8e8; --error-texto: #8a1c1c; --codigo: #f0f2f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #12151c; --panel: #1b2029; --texto: #e6e9f0; --suave: #9aa3b5; --borde: #2c3342;
+      --acento: #6c93ff; --acento-texto: #0d1117; --ok-fondo: #12301f; --ok-texto: #a7e8c0;
+      --error-fondo: #3a1818; --error-texto: #ffb4b4; --codigo: #11141b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header, main { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 24px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  .sub { color: var(--suave); margin: 0 0 16px; }
+  .rejilla { display: grid; gap: 16px; grid-template-columns: 1fr; padding-bottom: 32px; }
+  @media (min-width: 900px) { .rejilla { grid-template-columns: 1fr 1fr; } .ancho { grid-column: 1 / -1; } }
+  section { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 16px; min-width: 0; }
+  label { display: block; font-weight: 600; margin: 10px 0 4px; }
+  label small { font-weight: 400; color: var(--suave); }
+  input, select, textarea, button { font: inherit; color: inherit; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; background: var(--fondo); }
+  textarea { font-family: ui-monospace, Consolas, monospace; font-size: 13px; min-height: 220px; resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: 2px solid var(--acento); outline-offset: 1px; }
+  button { cursor: pointer; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--borde); background: var(--panel); }
+  button.principal { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); font-weight: 600; }
+  button.peligro { color: var(--error-texto); }
+  button:disabled { opacity: .55; cursor: wait; }
+  .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  #mensaje { margin: 0 0 16px; padding: 10px 14px; border-radius: 8px; display: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+  #mensaje.ok { display: block; background: var(--ok-fondo); color: var(--ok-texto); }
+  #mensaje.error { display: block; background: var(--error-fondo); color: var(--error-texto); }
+  .tabla-caja { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+  th { color: var(--suave); font-weight: 600; font-size: .85rem; }
+  td.num { text-align: right; }
+  td.params { white-space: normal; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  .fila-acciones { display: flex; gap: 6px; align-items: center; }
+  .fila-acciones input { width: 64px; padding: 4px 6px; }
+  .fila-acciones button { padding: 4px 10px; }
+  .total { margin-top: 12px; font-weight: 600; }
+  .vacio { color: var(--suave); padding: 12px 0; }
+  .etiqueta { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 7px; border-radius: 99px;
+              border: 1px solid var(--borde); color: var(--suave); vertical-align: middle; }
+  ul.catalogo { list-style: none; padding: 0; margin: 12px 0 0; }
+  ul.catalogo li { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+                   padding: 8px 0; border-bottom: 1px solid var(--borde); }
+  .nota { color: var(--suave); font-size: .85rem; margin-top: 8px; }
+  code { background: var(--codigo); padding: 1px 5px; border-radius: 4px; font-size: .9em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Figuras geométricas</h1>
+  <p class="sub">Instanciación por reflexión y clases Groovy cargadas en tiempo de ejecución.</p>
+  <p id="mensaje" role="status" aria-live="polite"></p>
+</header>
+
+<main class="rejilla">
+
+  <section aria-labelledby="t-crear">
+    <h2 id="t-crear">1. Crear una figura</h2>
+    <form id="formCrear" autocomplete="off">
+      <label for="clase">Clase <small>(elija una o escriba cualquier nombre)</small></label>
+      <input type="text" id="clase" list="listaClases" placeholder="Circulo" required>
+      <datalist id="listaClases"></datalist>
+      <div id="selectorConstructor" hidden>
+        <label for="constructor">Constructor</label>
+        <select id="constructor"></select>
+      </div>
+      <div id="campos"></div>
+      <div id="jsonCaja" hidden>
+        <label for="parametrosJson">Parámetros <small>(JSON; no se pudo inspeccionar la clase)</small></label>
+        <textarea id="parametrosJson" style="min-height:70px">{}</textarea>
+      </div>
+      <div class="acciones">
+        <button type="submit" class="principal">Crear figura</button>
+      </div>
+    </form>
+    <p class="nota">Los campos salen de la inspección por reflexión: <code>GET /api/clases/{nombre}/inspeccion</code>.</p>
+  </section>
+
+  <section aria-labelledby="t-groovy">
+    <h2 id="t-groovy">2. Registrar una clase nueva con Groovy</h2>
+    <form id="formGroovy">
+      <label for="codigo">Código fuente <small>(una clase que extienda <code>FiguraGeometrica</code>)</small></label>
+      <textarea id="codigo" spellcheck="false" placeholder="import com.udla.figuras.model.FiguraGeometrica&#10;&#10;class MiFigura extends FiguraGeometrica { ... }"></textarea>
+      <div class="acciones">
+        <button type="submit" class="principal">Registrar clase</button>
+        <button type="button" id="cargarEjemplo">Cargar ejemplo Pentagono</button>
+      </div>
+    </form>
+    <p class="nota">Se compila con una lista blanca de imports; el código con <code>System</code>, archivos o reflexión se rechaza.</p>
+  </section>
+
+  <section class="ancho" aria-labelledby="t-lista">
+    <h2 id="t-lista">3. Figuras creadas</h2>
+    <div class="tabla-caja" id="tablaCaja"></div>
+    <p class="total" id="total"></p>
+  </section>
+
+  <section class="ancho" aria-labelledby="t-catalogo">
+    <h2 id="t-catalogo">4. Catálogo externo</h2>
+    <div class="acciones" style="margin-top:0">
+      <button type="button" id="consultarCatalogo">Consultar catálogo</button>
+    </div>
+    <ul class="catalogo" id="catalogo"></ul>
+  </section>
+
+</main>
+
+<script>
+'use strict';
+
+const $ = (id) => document.getElementById(id);
+const TIPOS_NUMERICOS = ['double', 'float', 'int', 'long', 'short', 'byte', 'Double', 'Float', 'Integer', 'Long', 'Short', 'Byte'];
+let constructores = [];
+
+// ---------- utilidades ----------
+
+function mostrar(texto, tipo) {
+  const caja = $('mensaje');
+  caja.textContent = texto;
+  caja.className = tipo;
+}
+
+/** Llama a la API. Si responde con error lanza un Error con el mensaje JSON que envía el servidor. */
+async function api(metodo, ruta, cuerpo, esTexto) {
+  const opciones = { method: metodo, headers: {} };
+  if (cuerpo !== undefined) {
+    opciones.headers['Content-Type'] = esTexto ? 'text/plain; charset=utf-8' : 'application/json';
+    opciones.body = esTexto ? cuerpo : JSON.stringify(cuerpo);
+  }
+  let respuesta;
+  try {
+    respuesta = await fetch(ruta, opciones);
+  } catch (e) {
+    throw new Error('No se pudo contactar con el servidor: ' + e.message);
+  }
+  const texto = await respuesta.text();
+  let datos = null;
+  try { datos = texto ? JSON.parse(texto) : null; } catch (e) { datos = null; }
+  if (!respuesta.ok) {
+    const detalle = datos && datos.mensaje ? datos.mensaje : (texto || respuesta.statusText);
+    const error = new Error('Error ' + respuesta.status + ': ' + detalle);
+    error.estado = respuesta.status;
+    throw error;
+  }
+  return datos;
+}
+
+/** Ejecuta una acción deshabilitando el botón que la lanzó, y muestra el error si falla. */
+async function conBoton(boton, accion) {
+  if (boton) boton.disabled = true;
+  try { await accion(); } catch (e) { mostrar(e.message, 'error'); } finally { if (boton) boton.disabled = false; }
+}
+
+function celda(fila, texto, clase) {
+  const td = document.createElement('td');
+  td.textContent = texto;
+  if (clase) td.className = clase;
+  fila.appendChild(td);
+  return td;
+}
+
+// ---------- clases y formulario de creación ----------
+
+async function cargarClases() {
+  const clases = await api('GET', '/api/clases');
+  const lista = $('listaClases');
+  lista.replaceChildren();
+  for (const c of clases) {
+    const opcion = document.createElement('option');
+    opcion.value = c.nombre;
+    opcion.label = c.nombre + ' (' + c.origen + ')';
+    lista.appendChild(opcion);
+  }
+  if (!$('clase').value && clases.length) {
+    $('clase').value = clases[0].nombre;
+    await inspeccionar();
+  }
+}
+
+// Promesa de la inspección que está rehaciendo el formulario (la usa el envío para no mandarlo a medias)
+let inspeccionEnCurso = Promise.resolve(false);
+
+/** Devuelve true si se pudieron dibujar los campos de la clase. */
+async function inspeccionar() {
+  const nombre = $('clase').value.trim();
+  $('campos').replaceChildren();
+  $('selectorConstructor').hidden = true;
+  $('jsonCaja').hidden = true;
+  constructores = [];
+  if (!nombre) return false;
+  try {
+    const info = await api('GET', '/api/clases/' + encodeURIComponent(nombre) + '/inspeccion');
+    constructores = info.constructores;
+    const selector = $('constructor');
+    selector.replaceChildren();
+    constructores.forEach((c, i) => {
+      const opcion = document.createElement('option');
+      opcion.value = String(i);
+      opcion.textContent = c.firma;
+      selector.appendChild(opcion);
+    });
+    $('selectorConstructor').hidden = constructores.length < 2;
+    dibujarCampos();
+    return true;
+  } catch (e) {
+    // Clase desconocida: se deja enviar igualmente para ver la respuesta del servidor
+    mostrar(e.message, 'error');
+    $('jsonCaja').hidden = false;
+    return false;
+  }
+}
+
+function dibujarCampos() {
+  const cont = $('campos');
+  cont.replaceChildren();
+  const ctor = constructores[Number($('constructor').value) || 0];
+  if (!ctor) return;
+  for (const p of ctor.parametros) {
+    const etiqueta = document.createElement('label');
+    etiqueta.htmlFor = 'p-' + p.nombre;
+    etiqueta.textContent = p.nombre + ' ';
+    const tipo = document.createElement('small');
+    tipo.textContent = '(' + p.tipo + ')';
+    etiqueta.appendChild(tipo);
+
+    const entrada = document.createElement('input');
+    entrada.id = 'p-' + p.nombre;
+    entrada.dataset.nombre = p.nombre;
+    entrada.dataset.tipo = p.tipo;
+    if (TIPOS_NUMERICOS.includes(p.tipo)) {
+      entrada.type = 'number';
+      entrada.step = 'any';
+    } else if (p.tipo === 'boolean' || p.tipo === 'Boolean') {
+      entrada.type = 'checkbox';
+      entrada.style.width = 'auto';
+    } else {
+      entrada.type = 'text';
+    }
+    cont.append(etiqueta, entrada);
+  }
+  if (!ctor.parametros.length) {
+    const aviso = document.createElement('p');
+    aviso.className = 'nota';
+    aviso.textContent = 'Esta clase no necesita parámetros.';
+    cont.appendChild(aviso);
+  }
+}
+
+function leerParametros() {
+  if (!$('jsonCaja').hidden) {
+    return JSON.parse($('parametrosJson').value || '{}');
+  }
+  const parametros = {};
+  for (const entrada of $('campos').querySelectorAll('input')) {
+    if (entrada.type === 'checkbox') {
+      parametros[entrada.dataset.nombre] = entrada.checked;
+    } else if (entrada.value !== '') {
+      // los vacíos no se envían: así el servidor informa de qué parámetro falta
+      parametros[entrada.dataset.nombre] = entrada.type === 'number' ? Number(entrada.value) : entrada.value;
+    }
+  }
+  return parametros;
+}
+
+$('clase').addEventListener('change', () => { inspeccionEnCurso = inspeccionar(); });
+$('constructor').addEventListener('change', dibujarCampos);
+
+$('formCrear').addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  conBoton(evento.submitter, async () => {
+    // Si se acaba de cambiar la clase, el campo "change" ha lanzado una inspección que rehace el formulario:
+    // se espera a que termine para enviar lo que quede en pantalla y no un formulario a medias.
+    await inspeccionEnCurso;
+    let parametros;
+    try { parametros = leerParametros(); } catch (e) { throw new Error('Los parámetros no son un JSON válido: ' + e.message); }
+    const figura = await api('POST', '/api/figuras', { clase: $('clase').value.trim(), parametros });
+    mostrar('Figura #' + figura.id + ' creada: ' + figura.nombre + ', área ' + figura.area.toFixed(2)
+            + ', perímetro ' + figura.perimetro.toFixed(2), 'ok');
+    await cargarFiguras();
+  });
+});
+
+// ---------- lista de figuras ----------
+
+async function cargarFiguras() {
+  const [figuras, total] = await Promise.all([api('GET', '/api/figuras'), api('GET', '/api/figuras/area-total')]);
+  const caja = $('tablaCaja');
+  caja.replaceChildren();
+  if (!figuras.length) {
+    const vacio = document.createElement('p');
+    vacio.className = 'vacio';
+    vacio.textContent = 'Todavía no hay figuras. Cree una con el formulario.';
+    caja.appendChild(vacio);
+  } else {
+    const tabla = document.createElement('table');
+    const cabecera = tabla.createTHead().insertRow();
+    for (const t of ['Id', 'Clase', 'Nombre', 'Parámetros', 'Escala', 'Área', 'Perímetro', 'Acciones']) {
+      const th = document.createElement('th');
+      th.scope = 'col';
+      th.textContent = t;
+      cabecera.appendChild(th);
+    }
+    const cuerpo = tabla.createTBody();
+    for (const f of figuras) {
+      const fila = cuerpo.insertRow();
+      celda(fila, '#' + f.id);
+      celda(fila, f.clase);
+      celda(fila, f.nombre);
+      celda(fila, Object.entries(f.parametros).map(([k, v]) => k + '=' + v).join(', ') || '—', 'params');
+      celda(fila, '×' + f.escala, 'num');
+      celda(fila, f.area.toFixed(2), 'num');
+      celda(fila, f.perimetro.toFixed(2), 'num');
+
+      const acciones = document.createElement('div');
+      acciones.className = 'fila-acciones';
+      const factor = document.createElement('input');
+      factor.type = 'number'; factor.step = 'any'; factor.value = '2';
+      factor.setAttribute('aria-label', 'Factor de escala de la figura ' + f.id);
+      const escalar = document.createElement('button');
+      escalar.type = 'button'; escalar.textContent = 'Escalar';
+      escalar.addEventListener('click', () => conBoton(escalar, async () => {
+        await api('POST', '/api/figuras/' + f.id + '/escalar', { factor: Number(factor.value) });
+        mostrar('Figura #' + f.id + ' escalada por ' + factor.value, 'ok');
+        await cargarFiguras();
+      }));
+      const borrar = document.createElement('button');
+      borrar.type = 'button'; borrar.textContent = 'Eliminar'; borrar.className = 'peligro';
+      borrar.addEventListener('click', () => conBoton(borrar, async () => {
+        await api('DELETE', '/api/figuras/' + f.id);
+        mostrar('Figura #' + f.id + ' eliminada', 'ok');
+        await cargarFiguras();
+      }));
+      acciones.append(factor, escalar, borrar);
+      fila.insertCell().appendChild(acciones);
+    }
+    caja.appendChild(tabla);
+  }
+  $('total').textContent = 'Área total (' + total.cantidad + ' figura' + (total.cantidad === 1 ? '' : 's') + '): '
+                           + total.areaTotal.toFixed(2);
+}
+
+// ---------- código Groovy ----------
+
+$('formGroovy').addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  conBoton(evento.submitter, async () => {
+    const info = await api('POST', '/api/clases/groovy', $('codigo').value, true);
+    mostrar('Clase ' + info.nombre + ' registrada (origen ' + info.origen + '). Ya puede crearla como cualquier otra.', 'ok');
+    await cargarClases();
+    $('clase').value = info.nombre;
+    await inspeccionar();
+  });
+});
+
+$('cargarEjemplo').addEventListener('click', (evento) => conBoton(evento.currentTarget, async () => {
+  const ejemplo = await api('GET', '/mock-catalogo/figuras/Pentagono');
+  $('codigo').value = ejemplo.codigoGroovy;
+  mostrar('Ejemplo cargado: revise el código y pulse "Registrar clase".', 'ok');
+}));
+
+// ---------- catálogo externo ----------
+
+$('consultarCatalogo').addEventListener('click', (evento) => conBoton(evento.currentTarget, async () => {
+  const nombres = await api('GET', '/api/clases/remotas');
+  const lista = $('catalogo');
+  lista.replaceChildren();
+  if (!nombres.length) {
+    const vacio = document.createElement('li');
+    vacio.textContent = 'El catálogo no ofrece figuras.';
+    lista.appendChild(vacio);
+  }
+  for (const nombre of nombres) {
+    const item = document.createElement('li');
+    const texto = document.createElement('span');
+    texto.textContent = nombre;
+    const traer = document.createElement('button');
+    traer.type = 'button'; traer.textContent = 'Traer y registrar';
+    traer.addEventListener('click', () => conBoton(traer, async () => {
+      const info = await api('POST', '/api/clases/remotas/' + encodeURIComponent(nombre));
+      mostrar('Clase ' + info.nombre + ' descargada del catálogo y registrada (origen ' + info.origen + ').', 'ok');
+      await cargarClases();
+      $('clase').value = info.nombre;
+      await inspeccionar();
+    }));
+    item.append(texto, traer);
+    lista.appendChild(item);
+  }
+  mostrar('Catálogo consultado: ' + nombres.length + ' figura(s) disponible(s).', 'ok');
+}));
+
+// ---------- arranque ----------
+
+(async () => {
+  try {
+    await cargarClases();
+    await cargarFiguras();
+  } catch (e) {
+    mostrar(e.message, 'error');
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(java -version 2>&1)",
+      "PowerShell(mvn -v 2>&1)",
+      "Bash(sed -i 's#<groovy.version>4.0.27</groovy.version>#<groovy.version>4.0.33</groovy.version>#' pom.xml)",
+      "Bash(./mvnw.cmd -q test -Dtest=CompiladorGroovyTest)"
+    ]
+  }
+}
